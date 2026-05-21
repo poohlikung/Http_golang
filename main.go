@@ -1,8 +1,6 @@
 package main
 
 import (
-	"strconv"
-
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -26,56 +24,28 @@ func main() {
 
 	app.Post("/books", createBooks)
 	// one pice
-	app.Get("/book/:id", getBook)
+	app.Get("/books/:id", getBook)
 	// Put
 	app.Put("/books/:id", updateBook)
-
+	// Delete
+	app.Delete("/books/:id", deleteBook)
+	// Upload File
+	app.Post("/upload", uploadFile)
 	app.Listen(":8080")
 }
 
-func getBooks(c *fiber.Ctx) error {
-	return c.JSON(books)
-}
-
-func getBook(c *fiber.Ctx) error {
-	bookid, err := strconv.Atoi(c.Params("id"))
+func uploadFile(c *fiber.Ctx) error {
+	file, err := c.FormFile("image")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 
 	}
-	for _, book := range books {
-		if book.ID == bookid {
-			return c.JSON(book)
-		}
-	}
-	return c.SendStatus(fiber.StatusNotFound)
-}
+	err = c.SaveFile(file, "./uploads/"+file.Filename)
 
-func createBooks(c *fiber.Ctx) error {
-	book := new(Book)
-
-	if err := c.BodyParser(book); err != nil {
-		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
-	}
-	books = append(books, *book)
-	return c.JSON(book)
-}
-
-func updateBook(c *fiber.Ctx) error {
-	bookId, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+
 	}
-	bookUpdate := new(Book)
-	if err := c.BodyParser(bookUpdate); err != nil {
-		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
-	}
-	for i, book := range books {
-		if book.ID == bookId {
-			books[i].Title = bookUpdate.Title
-			books[i].Author = bookUpdate.Author
-			return c.JSON(books[i])
-		}
-	}
-	return c.SendStatus(fiber.StatusNotFound)
+
+	return c.SendString("Upload complete")
 }
