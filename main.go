@@ -6,7 +6,9 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	jwtware "github.com/gofiber/jwt/v2"
+	"github.com/gofiber/swagger"
 	"github.com/golang-jwt/jwt/v4"
+	_ "github.com/poohlikung/fiber-test/docs"
 )
 
 // ประกาศ struct ในการกำหนดแม่แบบ
@@ -32,9 +34,19 @@ func checkMiddleware(c *fiber.Ctx) error {
 	return c.Next()
 }
 
+// @title Book API
+// @description This is a sample server for a book API.
+// @version 1.0
+// @host localhost:8080
+// @BasePath /
+// @schemes http
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func main() {
 	app := fiber.New()
 
+	app.Get("/swagger/*", swagger.HandlerDefault) //Doc Swagger
 	books = append(books, Book{ID: 1, Title: "Poohlikung", Author: "Pooh"})
 
 	books = append(books, Book{ID: 2, Title: "Paleerat", Author: "Nampung"})
